@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Responsive Student Card - React (Demo)</title>
+  <style>
+    :root{
+      --card-bg: #ffffff;
+      --card-border: #e0e0e5;
+      --accent: #6b8cff;
+      --text: #222;
+      --muted: #666;
+    }
+    body{
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: #f5f7fb;
+      color: var(--text);
+      margin: 24px;
+      display: flex;
+      justify-content: center;
+    }
+    .container{
+      width: 100%;
+      max-width: 900px;
+    }
+    .student-card{
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 6px 18px rgba(20,30,60,0.04);
+    }
+    .student-card.horizontal{
+      flex-direction: row;
+    }
+    .student-card.vertical{
+      flex-direction: column;
+      text-align: center;
+    }
+    .avatar{
+      flex: 0 0 96px;
+      height: 96px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #cfd8ff 0%, #9fb3ff 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      font-size:28px;
+      color: white;
+      box-shadow: 0 4px 8px rgba(100,110,200,0.12);
+    }
+    .info{
+      display:flex;
+      flex-direction: column;
+      gap:6px;
+      min-width: 0; 
+    }
+    .row{
+      display:flex;
+      gap: 12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .name{
+      font-size:18px;
+      font-weight:600;
+    }
+    .meta{
+      font-size:13px;
+      color: var(--muted);
+    }
+    .badge{
+      margin-left: auto;
+      background: rgba(107,140,255,0.12);
+      color: var(--accent);
+      padding:6px 10px;
+      border-radius: 999px;
+      font-weight:600;
+      font-size:13px;
+    }
+    @media (max-width: 768px){
+      .student-card{
+        padding: 16px;
+      }
+      .badge{
+        margin-left: 0;
+      }
+      .row{
+        justify-content: center;
+      }
+      .info{
+        align-items: center;
+      }
+    }
+    .controls{
+      display:flex;
+      gap:8px;
+      margin-top:12px;
+      justify-content:flex-end;
+    }
+    .controls.center{
+      justify-content:center;
+    }
+    button{
+      padding:8px 12px;
+      border-radius:8px;
+      border:1px solid var(--card-border);
+      background:white;
+      cursor:pointer;
+      font-weight:600;
+    }
+    button.secondary{
+      background:transparent;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="root"></div>
+  </div>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    function StudentCard({ student }) {
+      const BREAK = 768;
+      const [width, setWidth] = useState(
+        typeof window !== 'undefined' ? window.innerWidth : BREAK
+      );
+      useEffect(() => {
+        const onResize = () => setWidth(window.innerWidth);
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+      }, []);
+      const isWide = width >= BREAK;
+      return (
+        <div
+          className={"student-card " + (isWide ? "horizontal" : "vertical")}
+          aria-live="polite"
+        >
+          <div className="avatar" title={student.name}>
+            {/* initials */}
+            {student.name
+              .split(" ")
+              .map(n => n[0] || "")
+              .slice(0,2)
+              .join("")
+              .toUpperCase()}
+          </div>
+          <div className="info" style={{flex: 1}}>
+            <div className="row" style={{alignItems: isWide ? "center" : "flex-start"}}>
+              <div>
+                <div className="name">{student.name}</div>
+                <div className="meta">Branch: {student.branch} • Roll: {student.roll}</div>
+              </div>
+              {/* badge placed to the right on wide screens */}
+              <div className="badge" style={{display: isWide ? "inline-block" : "none"}}>
+                Desktop view
+              </div>
+            </div>
+            <div style={{marginTop: 12}}>
+              <div className="meta"><strong>Registration No:</strong> {student.regNo}</div>
+              <div className="meta">Aim: Responsive component for mobile & desktop</div>
+            </div>
+            {/* controls: show on bottom; center on mobile */}
+            <div className={"controls " + (isWide ? "" : "center")}>
+              <button onClick={() => alert(`Viewing ${student.name}`)}>View</button>
+              <button className="secondary" onClick={() => alert(`Edit ${student.name}`)}>Edit</button>
+            </div>
+          </div>
+          {/* small-screen badge shown under avatar when vertical */}
+          {!isWide && <div style={{marginTop:12}} className="badge">Mobile view</div>}
+        </div>
+      );
+    }
+    function App(){
+      const demoStudents = [
+        { name: "Deepak Kumar", roll: "18CSE01", branch: "CSE", regNo: "21AA01234" },
+        { name: "Priya R", roll: "18CSE02", branch: "CSE", regNo: "21AA01235" },
+      ];
+      const [index, setIndex] = useState(0);
+      return (
+        <div style={{display:"grid", gap:16}}>
+          <h2 style={{margin:0}}>Responsive Student Card — Demo</h2>
+          <p style={{marginTop:0, color:"#555"}}>Resize the browser to see horizontal ↔ vertical layout. It's driven by both CSS and JS (useEffect + useState).</p>
+
+          <StudentCard student={demoStudents[index]} />
+
+          <div style={{display:"flex", gap:8, justifyContent:"flex-end"}}>
+            <button onClick={() => setIndex((index+1) % demoStudents.length)}>Switch student</button>
+            <button onClick={() => {
+              alert("Try resizing the browser window to see layout change");
+            }}>Help</button>
+          </div>
+        </div>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
